@@ -38,7 +38,7 @@ make docker.run
 
 
 ## Test data generation
-This is an *optional* step as there is already `test.db` duckdb file in /service folder which allows to run the service directly without setting up anything. It contains a table called `users` which has following columns:
+This is an *optional* step as there is already `test.db` duckdb file necessary to run the service without setting up anything. It contains a table called `users` which has following columns:
 
 | id (int32)| joined_date (date) | name (varchar)|    email (varchar)      |
 |-----------|--------------------|---------------|-------------------------|
@@ -49,6 +49,6 @@ This is an *optional* step as there is already `test.db` duckdb file in /service
 ```
 make test-db
 ```
-- Creates a duckdb database file `test.db`
+- Creates a duckdb database file `test.db` inside folder `prepare-test-data`
 - Then creates 'users' table and populates 1 million dummy data. Takes around 2 mins.
-- Then it copies `test.db` file to `/service` folder.
+- `test.db` file is copied to the docker image and used by the service.

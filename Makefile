@@ -3,8 +3,6 @@
 # prepares test database with dummy 1 million records
 test-db:
 	cd prepare-test-data && go mod download && go run main.go
-# copy inside service so that it will used by the api
-	cp prepare-test-data/test.db service/test.db
 
 # builds docker image
 docker.build:

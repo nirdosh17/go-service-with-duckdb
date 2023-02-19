@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/marcboeker/go-duckdb"
@@ -37,7 +38,8 @@ func main() {
 }
 
 func setupDuckDB() *sql.DB {
-	db, err := sql.Open("duckdb", "test.db")
+	absPath, _ := filepath.Abs("../prepare-test-data/test.db")
+	db, err := sql.Open("duckdb", absPath+"?access_mode=read_only")
 	if err != nil {
 		panic(err)
 	}
