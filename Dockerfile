@@ -24,7 +24,7 @@ FROM debian:10.9-slim
 WORKDIR /service/
 
 # ~25 MB
-COPY ./service/test_data.db .
+COPY ./service/test.db .
 
 COPY --from=builder /service/gin-api .
 COPY --from=builder /tmp/libduckdb/libduckdb.so ./libduckdb/libduckdb.so

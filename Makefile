@@ -1,10 +1,10 @@
-.SILENT: docker.build docker.run build run prepare-test-db
+.SILENT: docker.build docker.run build run test-db
 
-prepare-test-db:
-# prepare test database
+test-db:
+# prepares test database
 	cd prepare-test-data && go mod download && go run main.go
 # copy inside service so that it will used by the api
-	cp prepare-test-data/test_data.db service/test_data.db
+	cp prepare-test-data/test.db service/test.db
 
 docker.build:
 	./scripts/build_image.sh

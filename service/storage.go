@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"time"
 )
 
 type Storage struct {
@@ -10,8 +9,8 @@ type Storage struct {
 }
 
 type DailyAggregatedUser struct {
-	Date  time.Time `json:"date"`
-	Count int       `json:"count"`
+	Date        string `json:"date"`
+	UsersJoined int    `json:"users_joined"`
 }
 
 func NewStorage(db *sql.DB) *Storage {
@@ -23,16 +22,16 @@ func (s *Storage) AggregatedUsers() ([]DailyAggregatedUser, error) {
 
 	rows, err := s.DB.Query(`
 		SELECT
-			created as date,
-			MAX(row_number) as count
+			CAST(joined_date AS VARCHAR) as date,
+			MAX(row_number) as users_joined
 		FROM (
 			SELECT
-				created,
-				ROW_NUMBER() OVER (PARTITION BY created) as row_number
+				joined_date,
+				ROW_NUMBER() OVER (PARTITION BY joined_date) as row_number
 			FROM users
-			WHERE created BETWEEN (now()::TIMESTAMP - INTERVAL '2 years') AND now()
-		) GROUP BY created
-		ORDER BY created ASC;`,
+			WHERE joined_date BETWEEN (now()::TIMESTAMP - INTERVAL '2 years') AND now()
+		) GROUP BY joined_date
+		ORDER BY joined_date ASC;`,
 	)
 
 	if err != nil {
@@ -41,7 +40,7 @@ func (s *Storage) AggregatedUsers() ([]DailyAggregatedUser, error) {
 
 	for rows.Next() {
 		var user DailyAggregatedUser
-		if err := rows.Scan(&user.Date, &user.Count); err != nil {
+		if err := rows.Scan(&user.Date, &user.UsersJoined); err != nil {
 			return nil, err
 		}
 		users = append(users, user)

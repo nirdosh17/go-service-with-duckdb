@@ -24,13 +24,14 @@ func main() {
 		panic(err)
 	}
 
+	st := time.Now()
 	i := 1
 	max := 1000000 // 1 million
 	log.Println("inserting 1 million randomly generated rows in users table...")
 	var date string
 	for i <= max {
 		date = randate(2021, 2022).Format("2006-01-02")
-		_, err := db.Exec(`INSERT INTO users (id, created, name, email) VALUES (?, ?, ?, ?)`, i, date, gofakeit.Name(), gofakeit.Email())
+		_, err := db.Exec(`INSERT INTO users (id, joined_date, name, email) VALUES (?, ?, ?, ?)`, i, date, gofakeit.Name(), gofakeit.Email())
 		if err != nil {
 			log.Println("failed to insert", err)
 			break
@@ -40,24 +41,25 @@ func main() {
 		}
 		i++
 	}
-	log.Println("done!")
+	log.Println("done! time taken:", time.Since(st))
 }
 
 func duckdb() (*sql.DB, error) {
-	db, err := sql.Open("duckdb", "test_data.db")
+	db, err := sql.Open("duckdb", "test.db")
 	if err != nil {
-		log.Println("failed to open test_data.db", err)
+		log.Println("failed to open test.db", err)
 		return nil, err
 	}
 
-	log.Println("opened test_data.db duckdb database file")
+	log.Println("opened test.db duckdb database file")
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER,
-			created DATE,
+			joined_date DATE,
 			name VARCHAR,
-			email VARCHAR
+			email VARCHAR,
+			PRIMARY KEY(id)
 		);
 	`)
 

@@ -14,7 +14,7 @@ func main() {
 	db := setupDuckDB()
 	storage := NewStorage(db)
 
-	r.GET("/user", func(c *gin.Context) {
+	r.GET("/users_joined_daily", func(c *gin.Context) {
 		users, err := storage.AggregatedUsers()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -30,14 +30,14 @@ func main() {
 			})
 			return
 		}
-		c.Data(http.StatusOK, "application/octet-stream", bytes)
+		c.Data(http.StatusOK, "application/json", bytes)
 	})
 
 	r.Run(":8000")
 }
 
 func setupDuckDB() *sql.DB {
-	db, err := sql.Open("duckdb", "test_data.db")
+	db, err := sql.Open("duckdb", "test.db")
 	if err != nil {
 		panic(err)
 	}
