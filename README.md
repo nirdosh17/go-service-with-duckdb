@@ -21,17 +21,20 @@ The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to
 
 
 ## Running without docker
-```
+```bash
 make run
 ```
 This will build and run the GIN service without using docker.
 
 
 ## Running as a container
-```
+```bash
+# builds docker image downloading DuckDB's C dependencies.
+make docker.build
+
+# runs docker image
 make docker.run
 ```
-This will build docker image downloading DuckDB C dependencies and then run the image.
 
 
 ## Test data generation
