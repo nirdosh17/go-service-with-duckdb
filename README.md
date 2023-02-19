@@ -35,7 +35,7 @@ This will build docker image downloading DuckDB C dependencies and then run the 
 
 
 ## Test data generation
-This is an *optional* step as there is a already a `test.db` duckdb file in /service folder which allows to run the service directly without setting up anything. It contains a table called `users` which has following columns:
+This is an *optional* step as there is already `test.db` duckdb file in /service folder which allows to run the service directly without setting up anything. It contains a table called `users` which has following columns:
 
 | id (int32)| joined_date (date) | name (varchar)|    email (varchar)      |
 |-----------|--------------------|---------------|-------------------------|
