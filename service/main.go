@@ -6,16 +6,20 @@ import (
 	"net/http"
 	"path/filepath"
 
+	// "github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	_ "github.com/marcboeker/go-duckdb"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
+	// enable this to profile the service
+	// pprof.Register(router)
+
 	db := setupDuckDB()
 	storage := NewStorage(db)
 
-	r.GET("/users_joined_daily", func(c *gin.Context) {
+	router.GET("/users_joined_daily", func(c *gin.Context) {
 		users, err := storage.AggregatedUsers()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -34,7 +38,7 @@ func main() {
 		c.Data(http.StatusOK, "application/json", bytes)
 	})
 
-	r.Run(":8000")
+	router.Run(":8000")
 }
 
 func setupDuckDB() *sql.DB {
