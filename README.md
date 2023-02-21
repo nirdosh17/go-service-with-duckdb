@@ -17,7 +17,7 @@ API response:
 	}
 ]
 ```
-The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to interact with DuckDB C libraries.
+The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to interact with DuckDB C++ shared library.
 
 
 ## Running without docker
@@ -29,7 +29,7 @@ This will build and run the GIN service without using docker.
 
 ## Running as a container
 ```bash
-# builds docker image downloading DuckDB's C dependencies.
+# builds docker image downloading DuckDB's dependencies.
 make docker.build
 
 # runs docker image
