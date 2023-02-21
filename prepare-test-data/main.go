@@ -45,13 +45,13 @@ func main() {
 }
 
 func duckdb() (*sql.DB, error) {
-	db, err := sql.Open("duckdb", "test.db")
+	db, err := sql.Open("duckdb", "test.duckdb")
 	if err != nil {
-		log.Println("failed to open test.db", err)
+		log.Println("failed to open test.duckdb", err)
 		return nil, err
 	}
 
-	log.Println("opened test.db duckdb database file")
+	log.Println("opened test.duckdb duckdb database file")
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS users (

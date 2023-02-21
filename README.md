@@ -2,7 +2,7 @@
 Sample Containerized Go service using [DuckDB](https://duckdb.org/)
 
 ## About the service
-The service exposes `GET http://localhost:8000/users_joined_daily` api which returns aggregated user count from DuckDB database `test.db`.
+The service exposes `GET http://localhost:8000/stats` api which returns aggregated user count from DuckDB database `test.duckdb`.
 
 API response:
 ```json
@@ -37,7 +37,7 @@ make docker.run
 ```
 
 ## Test data generation
-This is an *optional* step as there is already `test.db` duckdb file necessary to run the service without setting up anything. It contains a table called `users` which has following columns:
+This is an *optional* step as there is already `test.duckdb` duckdb file necessary to run the service without setting up anything. It contains a table called `users` which has following columns:
 
 | id (int32)| joined_date (date) | name (varchar)|    email (varchar)      |
 |-----------|--------------------|---------------|-------------------------|
@@ -48,9 +48,9 @@ This is an *optional* step as there is already `test.db` duckdb file necessary t
 ```bash
 make test-db
 ```
-- Creates a duckdb database file `test.db` inside folder `prepare-test-data`
+- Creates a duckdb database file `test.duckdb` inside folder `prepare-test-data`
 - Then creates 'users' table and populates 1 million dummy data. Takes around 2 mins.
-- `test.db` file is copied to the docker image and used by the service.
+- `test.duckdb` file is copied to the docker image and used by the service.
 
 
 ## CPU Profiling
@@ -58,7 +58,7 @@ make test-db
 
     Command:
     ```bash
-    bombardier -c 1 -n 1 http://localhost:8000/users_joined_daily
+    bombardier -c 1 -n 1 http://localhost:8000/stats
     ```
 
     Normal mode:
@@ -82,7 +82,7 @@ make test-db
 
 2. **CPU profile for 10 requests with concurrency 2**
 
-    Command: `bombardier -c 2 -n 10 http://localhost:8000/users_joined_daily`
+    Command: `bombardier -c 2 -n 10 http://localhost:8000/stats`
 
     Normal mode:
     ```bash

@@ -19,7 +19,7 @@ func main() {
 	db := setupDuckDB()
 	storage := NewStorage(db)
 
-	router.GET("/users_joined_daily", func(c *gin.Context) {
+	router.GET("/stats", func(c *gin.Context) {
 		users, err := storage.AggregatedUsers()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -42,7 +42,7 @@ func main() {
 }
 
 func setupDuckDB() *sql.DB {
-	absPath, _ := filepath.Abs("../prepare-test-data/test.db")
+	absPath, _ := filepath.Abs("../prepare-test-data/test.duckdb")
 	db, err := sql.Open("duckdb", absPath+"?access_mode=read_only")
 	if err != nil {
 		panic(err)
