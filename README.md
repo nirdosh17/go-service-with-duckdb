@@ -17,7 +17,7 @@ API response:
 	}
 ]
 ```
-The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to interact with DuckDB C libraries.
+The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to interact with DuckDB C++ shared library.
 
 
 ## Running without docker
