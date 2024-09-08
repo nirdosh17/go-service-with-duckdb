@@ -1,8 +1,8 @@
 # Go DuckDB API
-A sample containerized Go API backed by [DuckDB](https://duckdb.org/) database.
+A simple containerized Go API backed by [DuckDB](https://duckdb.org/) database.
 
-## About the service
-The service exposes `GET http://localhost:8000/user/:id` api which returns user details DuckDB database `test.duckdb`.
+## About
+The service exposes `GET http://localhost:8000/users/:id` api which returns user details DuckDB database `test.duckdb`.
 
 API response:
 ```json
@@ -15,32 +15,41 @@ API response:
 ```
 The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to interact with DuckDB C++ shared library.
 
+## Running the API
 
-## Running without docker
+### 1. Generating test data
 ```bash
-make run
-```
-This will build and run Go service without using docker.
+# populates 100K records
+make seed
 
-
-## Running as a container
-```bash
-make docker.build
-make docker.run
+# with custom seed size
+SEED_COUNT=200000 make seed
 ```
 
-## Test data generation
-This is an *optional* step as there is already `test.duckdb` duckdb file necessary to run the service without setting up anything. It contains a table called `users` which has following columns:
+The seed command generates `testdata/test.duckdb` duckdb file necessary to run the service. It contains `users` table which has following columns:
 
 | id (int32)| joined_date (timestamp) | name (varchar)|    email (varchar)      |
 |-----------|--------------------|---------------|-------------------------|
 |      1    |     2021-09-14     |  Jarret Kuhn  |  carsondooley@wolf.name |
 
 
-**Command:**
+### 2. Running service
+
+Normally:
 ```bash
-make seed
+make build
+make run
 ```
-- Creates a duckdb database file `test.duckdb` inside folder `testdata`
-- Then creates 'users' table and populates specified number of dummy records.
-- `test.duckdb` file is copied to the docker image and used by the service.
+
+As a docker container:
+```bash
+make docker.build
+make docker.run
+```
+
+### Load testing
+```bash
+wrk -t12 -c100 -d10s --latency http://127.0.0.1:8000/users/100
+```
+
+_More about the load testing tool [wrk](https://github.com/wg/wrk)._

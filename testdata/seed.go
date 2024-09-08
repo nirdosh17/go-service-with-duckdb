@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	_ "github.com/marcboeker/go-duckdb"
 )
 
-var SeedDataSize = 100_000
+var DefaultSeedDataSize = 100_000
 
 func randate(startYear, endYear int) time.Time {
 	min := time.Date(startYear, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
@@ -27,7 +29,13 @@ func main() {
 		panic(err)
 	}
 
-	log.Printf("inserting %v rows...", SeedDataSize)
+	seedDataSize, err := strconv.Atoi(os.Getenv("SEED_COUNT"))
+	if err != nil {
+		log.Println("failed to parse env SEED_COUNT, defaulting to", DefaultSeedDataSize)
+		seedDataSize = DefaultSeedDataSize
+	}
+
+	log.Printf("inserting %v rows...", seedDataSize)
 	start := time.Now()
 
 	tx, err := db.Begin()
@@ -41,7 +49,7 @@ func main() {
 	defer stmt.Close()
 
 	var date string
-	for i := 1; i <= SeedDataSize; i++ {
+	for i := 1; i <= seedDataSize; i++ {
 		date = randate(2021, 2022).Format(time.RFC3339)
 		_, err := stmt.Exec(i, date, gofakeit.Name(), gofakeit.Email())
 		if err != nil {
@@ -49,14 +57,14 @@ func main() {
 		}
 
 		// track %
-		fmt.Printf("%0.0f%% complete\r", float32((i*100)/SeedDataSize))
+		fmt.Printf("%0.0f%% complete\r", float32((i*100)/seedDataSize))
 	}
 
 	if err := tx.Commit(); err != nil {
 		log.Fatal("Failed to commit transaction:", err)
 	}
 
-	log.Printf("%v rows populated in %v\n", SeedDataSize, time.Since(start))
+	log.Printf("%v rows populated in %v\n", seedDataSize, time.Since(start))
 }
 
 func duckdb() (*sql.DB, error) {

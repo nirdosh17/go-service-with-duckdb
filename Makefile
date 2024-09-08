@@ -2,15 +2,15 @@
 
 .SILENT: docker.build docker.run build run test-db
 
-seed: ## generate test database with dummy records
+seed: ## 1. generate test data
 	rm -f testdata/test.duckdb*
 	cd testdata && go mod download && go run seed.go
 
-docker.build: ## build docker image
+docker.build: ## 2. build docker image
 	./scripts/build_image.sh
 
-docker.run: ## run service inside docker container
-	docker run --name duck-api -p 8000:8000 duck-api
+docker.run: ## 3. run service inside docker container
+	docker run --rm --name duck-api -p 8000:8000 duck-api
 
 build: ## build go binary
 	cd service && go mod download && \
