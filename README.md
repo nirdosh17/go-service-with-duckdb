@@ -1,10 +1,10 @@
 # Go DuckDB API
-A simple containerized Go API backed by [DuckDB](https://duckdb.org/) database.
+A simple containerized Go API backed by [DuckDB](https://duckdb.org/).
 
 ## About
-The service exposes `GET http://localhost:8000/users/:id` api which returns user details DuckDB database `test.duckdb`.
+The service exposes `GET http://localhost:8000/users/:id` api which returns user details from DuckDB running in [persistent mode](https://duckdb.org/docs/connect/overview.html#persistent-database).
 
-API response:
+**API response:**
 ```json
 {
   "id": 100000,
@@ -19,7 +19,7 @@ The service uses [go-duckdb](https://github.com/marcboeker/go-duckdb) library to
 
 ### 1. Generating test data
 ```bash
-# populates 100K records
+# populates 100K records in duckdb
 make seed
 
 # with custom seed size
@@ -47,7 +47,7 @@ make docker.build
 make docker.run
 ```
 
-### Load testing
+## Load testing
 ```bash
 wrk -t12 -c100 -d10s --latency http://127.0.0.1:8000/users/100
 ```
