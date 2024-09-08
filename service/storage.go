@@ -2,50 +2,55 @@ package main
 
 import (
 	"database/sql"
+	"errors"
+	"time"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type Storage struct {
 	DB *sql.DB
 }
 
-type DailyAggregatedUser struct {
-	Date        string `json:"date"`
-	UsersJoined int    `json:"users_joined"`
+func NewStorage(ddbFilePath string) *Storage {
+	ddb := initDuckDB(ddbFilePath)
+	return &Storage{DB: ddb}
 }
 
-func NewStorage(db *sql.DB) *Storage {
-	return &Storage{DB: db}
+type User struct {
+	ID         int       `json:"id"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	JoinedDate time.Time `json:"joined_date"`
 }
 
-func (s *Storage) AggregatedUsers() ([]DailyAggregatedUser, error) {
-	users := []DailyAggregatedUser{}
-
-	rows, err := s.DB.Query(`
+func (s *Storage) GetUserByID(id int) (User, error) {
+	row := s.DB.QueryRow(`
 		SELECT
-			CAST(joined_date AS VARCHAR) as date,
-			MAX(row_number) as users_joined
-		FROM (
-			SELECT
-				joined_date,
-				ROW_NUMBER() OVER (PARTITION BY joined_date) as row_number
-			FROM users
-			WHERE joined_date BETWEEN (now()::TIMESTAMP - INTERVAL '2 years') AND now()
-		) GROUP BY joined_date
-		ORDER BY joined_date ASC;`,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for rows.Next() {
-		var user DailyAggregatedUser
-		if err := rows.Scan(&user.Date, &user.UsersJoined); err != nil {
-			return nil, err
+			id,
+			name,
+			email,
+			joined_date
+		FROM users
+		WHERE id = ?;`, id)
+	user := User{}
+	if err := row.Scan(&user.ID, &user.Name, &user.Email, &user.JoinedDate); err != nil {
+		if err == sql.ErrNoRows {
+			return user, ErrUserNotFound
 		}
-		users = append(users, user)
+		return user, err
 	}
-	rows.Close()
+	return user, nil
+}
 
-	return users, nil
+func initDuckDB(ddbFilePath string) *sql.DB {
+	db, err := sql.Open("duckdb", ddbFilePath+"?access_mode=read_only")
+	if err != nil {
+		panic(err)
+	}
+	if db.Ping() != nil {
+		panic("failed to ping db!")
+	}
+
+	return db
 }

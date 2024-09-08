@@ -1,51 +1,74 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
-	"path/filepath"
+	"os"
+	"strconv"
 
 	// "github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
+
 	_ "github.com/marcboeker/go-duckdb"
 )
 
 func main() {
-	router := gin.Default()
+	router := http.NewServeMux()
 	// enable this to profile the service
 	// pprof.Register(router)
 
-	db := setupDuckDB()
-	storage := NewStorage(db)
+	ddbPath := os.Getenv("DUCK_DB_FILE_PATH")
+	storage := NewStorage(ddbPath)
 
-	router.GET("/stats", func(c *gin.Context) {
-		users, err := storage.AggregatedUsers()
+	router.HandleFunc("GET /users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		uid, err := strconv.Atoi(id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
+			badRequest(w)
 			return
 		}
 
-		bytes, err := json.Marshal(users)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
+		user, err := storage.GetUserByID(uid)
+		if err == nil {
+			b, merr := json.Marshal(user)
+			if merr != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(b)
 			return
 		}
-		c.Data(http.StatusOK, "application/json", bytes)
+
+		log.Println(err)
+		if err == ErrUserNotFound {
+			notFound(w)
+			return
+		}
+
+		internalError(w)
 	})
 
-	router.Run(":8000")
+	log.Println("starting server at localhost:8000")
+	if err := http.ListenAndServe(":8000", router); err != nil {
+		log.Fatalln("failed to start server", err)
+	}
 }
 
-func setupDuckDB() *sql.DB {
-	absPath, _ := filepath.Abs("../prepare-test-data/test.duckdb")
-	db, err := sql.Open("duckdb", absPath+"?access_mode=read_only")
-	if err != nil {
-		panic(err)
-	}
-	return db
+func badRequest(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte(`{"message": "invalid user id"}`))
+}
+
+func notFound(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte(`{"message": "user not found"}`))
+}
+
+func internalError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(`{"message": "internal server error"}`))
 }
