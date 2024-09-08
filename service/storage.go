@@ -45,7 +45,7 @@ func (s *Storage) GetUserByID(id int) (User, error) {
 }
 
 func initDuckDB() *sql.DB {
-	absPath, _ := filepath.Abs("../prepare-test-data/test.duckdb")
+	absPath, _ := filepath.Abs("../testdata/test.duckdb")
 	db, err := sql.Open("duckdb", absPath+"?access_mode=read_only")
 	if err != nil {
 		panic(err)

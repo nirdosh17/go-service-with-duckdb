@@ -23,20 +23,20 @@ COPY service/ .
 RUN CGO_ENABLED=1 \
   CGO_LDFLAGS="-L/tmp/libduckdb" \
   go build -tags=duckdb_use_lib  \
-  -o gin-api *.go
+  -o duckapi *.go
 
 FROM debian:10.9-slim
 
 WORKDIR /service/
 
 # ~90 MB
-COPY ./prepare-test-data/test.duckdb /prepare-test-data/test.duckdb
+COPY ./testdata/test.duckdb /testdata/test.duckdb
 
-COPY --from=builder /service/gin-api .
+COPY --from=builder /service/duckapi .
 COPY --from=builder /tmp/libduckdb/libduckdb.so ./libduckdb/libduckdb.so
 
 ENV LD_LIBRARY_PATH=./libduckdb
 
 EXPOSE 8000
 
-CMD ["./gin-api"]
+CMD ["./duckapi"]
