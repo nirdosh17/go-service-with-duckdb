@@ -1,15 +1,16 @@
-FROM golang:1.18 as builder
+FROM golang:1.22 AS builder
 
 LABEL maintainer="Nirdosh Gautam <nrdshgtm@gmail.com>"
 
 ARG CPU_ARCH
+ARG DUCKDB_VERSION=v1.0.0
 
 RUN apt-get update; \
   apt-get -y install unzip
 
 WORKDIR /service
 
-RUN wget -nv https://github.com/duckdb/duckdb/releases/download/v0.7.0/libduckdb-linux-${CPU_ARCH}.zip -O libduckdb.zip; \
+RUN wget -nv https://github.com/duckdb/duckdb/releases/download/${DUCKDB_VERSION}/libduckdb-linux-${CPU_ARCH}.zip -O libduckdb.zip; \
   unzip libduckdb.zip -d /tmp/libduckdb
 
 # copying go.mod and go.sum first to leverage docker cache
@@ -34,7 +35,7 @@ COPY ./prepare-test-data/test.duckdb /prepare-test-data/test.duckdb
 COPY --from=builder /service/gin-api .
 COPY --from=builder /tmp/libduckdb/libduckdb.so ./libduckdb/libduckdb.so
 
-ENV LD_LIBRARY_PATH ./libduckdb
+ENV LD_LIBRARY_PATH=./libduckdb
 
 EXPOSE 8000
 

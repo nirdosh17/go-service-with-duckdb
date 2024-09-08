@@ -6,6 +6,3 @@ if [[ $(uname -m) == *"arm"* ]]; then
 fi
 
 docker build --build-arg "CPU_ARCH=${CPU_ARCH}" -t gin-api .
-
-echo "cleaning up old docker images..."
-docker system prune -f
