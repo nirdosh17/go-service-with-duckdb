@@ -25,16 +25,17 @@ RUN CGO_ENABLED=1 \
   go build -tags=duckdb_use_lib  \
   -o duckapi *.go
 
-FROM debian:10.9-slim
+FROM ubuntu
 
 WORKDIR /service/
 
 # ~90 MB
-COPY ./testdata/test.duckdb /testdata/test.duckdb
+COPY ./testdata/test.duckdb* /service
 
 COPY --from=builder /service/duckapi .
 COPY --from=builder /tmp/libduckdb/libduckdb.so ./libduckdb/libduckdb.so
 
+ENV DUCK_DB_FILE_PATH=/service/test.duckdb
 ENV LD_LIBRARY_PATH=./libduckdb
 
 EXPOSE 8000

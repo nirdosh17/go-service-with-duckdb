@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	// "github.com/gin-contrib/pprof"
@@ -16,7 +17,8 @@ func main() {
 	// enable this to profile the service
 	// pprof.Register(router)
 
-	storage := NewStorage()
+	ddbPath := os.Getenv("DUCK_DB_FILE_PATH")
+	storage := NewStorage(ddbPath)
 
 	router.HandleFunc("GET /users/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
@@ -38,6 +40,7 @@ func main() {
 			return
 		}
 
+		log.Println(err)
 		if err == ErrUserNotFound {
 			notFound(w)
 			return

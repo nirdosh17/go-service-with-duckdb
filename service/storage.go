@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"path/filepath"
 	"time"
 )
 
@@ -13,8 +12,8 @@ type Storage struct {
 	DB *sql.DB
 }
 
-func NewStorage() *Storage {
-	ddb := initDuckDB()
+func NewStorage(ddbFilePath string) *Storage {
+	ddb := initDuckDB(ddbFilePath)
 	return &Storage{DB: ddb}
 }
 
@@ -44,11 +43,14 @@ func (s *Storage) GetUserByID(id int) (User, error) {
 	return user, nil
 }
 
-func initDuckDB() *sql.DB {
-	absPath, _ := filepath.Abs("../testdata/test.duckdb")
-	db, err := sql.Open("duckdb", absPath+"?access_mode=read_only")
+func initDuckDB(ddbFilePath string) *sql.DB {
+	db, err := sql.Open("duckdb", ddbFilePath+"?access_mode=read_only")
 	if err != nil {
 		panic(err)
 	}
+	if db.Ping() != nil {
+		panic("failed to ping db!")
+	}
+
 	return db
 }
